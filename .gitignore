@@ -1,0 +1,14 @@
+node_modules/
+dist/
+.netlify/
+.env
+.env.*
+!.env.example
+coverage/
+test-results/
+playwright-report/
+.codex-import/
+.docx-review/
+.docx_nameideas_render/
+*.log
+
