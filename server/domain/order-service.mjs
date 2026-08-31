@@ -4,7 +4,7 @@ import { withTransaction } from "../db/transaction.mjs";
 import { DomainError } from "./errors.mjs";
 import { calculateDiscount, reservePromo } from "./promo-service.mjs";
 
-function toPublicOrder(row) {
+export function toPublicOrder(row) {
   if (!row) {
     return null;
   }

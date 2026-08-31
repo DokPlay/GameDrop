@@ -64,6 +64,17 @@ export function databaseFixtures(pool) {
       return rows[0];
     },
 
+    async markOrderPaid(orderId) {
+      const { rows } = await pool.query(
+        `UPDATE orders
+         SET status = 'paid', paid_at = now(), updated_at = now()
+         WHERE id = $1
+         RETURNING *`,
+        [orderId],
+      );
+      return rows[0];
+    },
+
     async createKey(productId, code = `KEY-${randomUUID()}`) {
       const { rows } = await pool.query(
         `INSERT INTO inventory_keys (id, product_id, code)
