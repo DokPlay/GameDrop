@@ -73,5 +73,22 @@ export function databaseFixtures(pool) {
       );
       return rows[0];
     },
+
+    async createPromo(overrides = {}) {
+      const promo = {
+        code: overrides.code ?? `PROMO${randomUUID().replaceAll("-", "").slice(0, 8).toUpperCase()}`,
+        discountType: overrides.discountType ?? "percent",
+        discountValue: overrides.discountValue ?? 10,
+        maxUses: overrides.maxUses ?? 10,
+      };
+      const { rows } = await pool.query(
+        `INSERT INTO promos (
+           id, code, discount_type, discount_value, max_uses, used_count, active
+         ) VALUES ($1, $2, $3, $4, $5, 0, true)
+         RETURNING *`,
+        [randomUUID(), promo.code, promo.discountType, promo.discountValue, promo.maxUses],
+      );
+      return rows[0];
+    },
   };
 }
