@@ -1,0 +1,2 @@
+# Netlify Database migration checksums are byte-sensitive.
+netlify/database/migrations/*.sql text eol=lf
