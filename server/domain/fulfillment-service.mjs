@@ -6,11 +6,12 @@ import { toPublicOrder } from "./order-service.mjs";
 import { transition } from "./status-machine.mjs";
 
 export class FulfillmentService {
-  constructor({ pool }) {
+  constructor({ pool, supplierService = null }) {
     this.pool = pool;
+    this.supplierService = supplierService;
   }
 
-  async fulfillPaidOrder(orderId) {
+  async fulfillPaidOrder(orderId, options = {}) {
     return withTransaction(async (client) => {
       const repository = new FulfillmentRepository(client);
       let order = await repository.getOrder(orderId, { forUpdate: true });
@@ -29,13 +30,24 @@ export class FulfillmentService {
         );
       }
 
+      const fulfillmentMode = order.fulfillment_mode;
       const delivering = transition(order.status, "delivering");
       order = await repository.updateOrderStatus(order.id, delivering);
       const fulfillment = await repository.ensureRecord({
         id: randomUUID(),
         orderId: order.id,
-        source: "pool",
+        source: fulfillmentMode,
       });
+
+      if (fulfillmentMode === "supplier") {
+        return this.#fulfillFromSupplier({
+          repository,
+          order,
+          fulfillment,
+          behaviors: options.supplierBehaviors ?? {},
+        });
+      }
+
       const key = await repository.claimAvailableKey(order.product_id);
 
       if (!key) {
@@ -75,5 +87,72 @@ export class FulfillmentService {
       });
       return toPublicOrder(order);
     }, { pool: this.pool });
+  }
+
+  async #fulfillFromSupplier({ repository, order, fulfillment, behaviors }) {
+    if (!this.supplierService) {
+      throw new DomainError("SUPPLIER_NOT_CONFIGURED", "Supplier service is not configured", {
+        httpStatus: 503,
+      });
+    }
+
+    const requestId = fulfillment.request_id ?? `fulfill_${order.id}`;
+    const firstProvider = fulfillment.provider ?? "A";
+    const providers = firstProvider === "A" ? ["A", "B"] : [firstProvider];
+
+    for (const provider of providers) {
+      await repository.setSupplierRoute(fulfillment.id, provider, requestId);
+      try {
+        const response = await this.supplierService.issueFromSupplier({
+          provider,
+          requestId,
+          sku: order.sku,
+          orderId: order.id,
+          behavior: behaviors[provider],
+        });
+        const delivered = await repository.markSupplierDelivered({
+          fulfillmentId: fulfillment.id,
+          orderId: order.id,
+          provider,
+          requestId,
+          code: response.code,
+        });
+        await repository.addAttempt({
+          orderId: order.id,
+          fulfillmentId: fulfillment.id,
+          provider,
+          requestId,
+          outcome: "delivered",
+        });
+        return toPublicOrder(delivered);
+      } catch (error) {
+        const isTimeout = error.code === "SUPPLIER_TIMEOUT";
+        await repository.addAttempt({
+          orderId: order.id,
+          fulfillmentId: fulfillment.id,
+          provider,
+          requestId,
+          outcome: isTimeout ? "timeout" : "failed",
+          errorCode: error.code ?? "SUPPLIER_ERROR",
+          errorDetail: error.message,
+          ambiguous: isTimeout,
+        });
+
+        if (isTimeout || provider === "B" || error.code !== "SUPPLIER_5XX") {
+          const failed = await repository.markSupplierFailure({
+            fulfillmentId: fulfillment.id,
+            orderId: order.id,
+            provider,
+            requestId,
+            error,
+          });
+          return toPublicOrder(failed);
+        }
+      }
+    }
+
+    throw new DomainError("SUPPLIER_EXHAUSTED", "No supplier completed fulfillment", {
+      httpStatus: 503,
+    });
   }
 }

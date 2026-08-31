@@ -6,7 +6,10 @@ export class FulfillmentRepository {
   async getOrder(orderId, options = {}) {
     const lockClause = options.forUpdate ? " FOR UPDATE" : "";
     const { rows } = await this.queryable.query(
-      `SELECT * FROM orders WHERE id = $1${lockClause}`,
+      `SELECT orders.*, products.fulfillment_mode
+       FROM orders
+       JOIN products ON products.id = orders.product_id
+       WHERE orders.id = $1${lockClause}`,
       [orderId],
     );
     return rows[0] ?? null;
@@ -32,7 +35,7 @@ export class FulfillmentRepository {
        VALUES ($1, $2, $3, 'delivering')
        ON CONFLICT (order_id) DO UPDATE
          SET status = CASE
-           WHEN fulfillment_records.status IN ('out_of_stock', 'failed') THEN 'delivering'
+           WHEN fulfillment_records.status IN ('out_of_stock', 'failed', 'timeout') THEN 'delivering'
            ELSE fulfillment_records.status
          END,
          updated_at = now()
@@ -92,6 +95,57 @@ export class FulfillmentRepository {
     return rows[0];
   }
 
+  async setSupplierRoute(fulfillmentId, provider, requestId) {
+    const { rows } = await this.queryable.query(
+      `UPDATE fulfillment_records
+       SET source = 'supplier',
+           provider = $2,
+           request_id = $3,
+           status = 'delivering',
+           updated_at = now()
+       WHERE id = $1
+       RETURNING *`,
+      [fulfillmentId, provider, requestId],
+    );
+    return rows[0];
+  }
+
+  async markSupplierDelivered({ fulfillmentId, orderId, provider, requestId, code }) {
+    await this.queryable.query(
+      `UPDATE fulfillment_records
+       SET source = 'supplier', provider = $2, request_id = $3,
+           status = 'delivered', issued_code = $4,
+           delivered_at = now(), updated_at = now()
+       WHERE id = $1`,
+      [fulfillmentId, provider, requestId, code],
+    );
+    const { rows } = await this.queryable.query(
+      `UPDATE orders
+       SET status = 'delivered', issued_code = $2,
+           delivered_at = now(), last_error_code = NULL,
+           last_error_detail = NULL, updated_at = now()
+       WHERE id = $1
+       RETURNING *`,
+      [orderId, code],
+    );
+    return rows[0];
+  }
+
+  async markSupplierFailure({ fulfillmentId, orderId, provider, requestId, error }) {
+    const fulfillmentStatus = error.code === "SUPPLIER_TIMEOUT" ? "timeout" : "failed";
+    await this.queryable.query(
+      `UPDATE fulfillment_records
+       SET source = 'supplier', provider = $2, request_id = $3,
+           status = $4, updated_at = now()
+       WHERE id = $1`,
+      [fulfillmentId, provider, requestId, fulfillmentStatus],
+    );
+    return this.updateOrderStatus(orderId, "delivery_failed", {
+      code: error.code,
+      detail: error.message,
+    });
+  }
+
   async markOutOfStock({ fulfillmentId, orderId }) {
     await this.queryable.query(
       `UPDATE fulfillment_records
@@ -108,15 +162,19 @@ export class FulfillmentRepository {
   async addAttempt(attempt) {
     await this.queryable.query(
       `INSERT INTO fulfillment_attempts (
-         order_id, fulfillment_id, outcome, error_code, error_detail,
+         order_id, fulfillment_id, provider, request_id,
+         outcome, error_code, error_detail,
          ambiguous, started_at, finished_at
-       ) VALUES ($1, $2, $3, $4, $5, false, now(), now())`,
+       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, now(), now())`,
       [
         attempt.orderId,
         attempt.fulfillmentId,
+        attempt.provider ?? null,
+        attempt.requestId ?? null,
         attempt.outcome,
         attempt.errorCode ?? null,
         attempt.errorDetail ?? null,
+        attempt.ambiguous ?? false,
       ],
     );
   }
