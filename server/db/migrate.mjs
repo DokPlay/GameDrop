@@ -5,6 +5,11 @@ import { getPool } from "./pool.mjs";
 
 const migrationsDirectory = fileURLToPath(new URL("./migrations/", import.meta.url));
 
+export function migrationChecksum(sql) {
+  const canonicalSql = sql.replace(/\r\n?/g, "\n");
+  return createHash("sha256").update(canonicalSql).digest("hex");
+}
+
 export async function migrate(options = {}) {
   const pool = options.pool ?? getPool();
   const client = await pool.connect();
@@ -25,7 +30,7 @@ export async function migrate(options = {}) {
 
     for (const file of files) {
       const sql = await readFile(new URL(`./migrations/${file}`, import.meta.url), "utf8");
-      const checksum = createHash("sha256").update(sql).digest("hex");
+      const checksum = migrationChecksum(sql);
       const existing = await client.query(
         "SELECT checksum FROM schema_migrations WHERE version = $1",
         [file],
