@@ -4,7 +4,7 @@ const allowedTransitions = new Map([
   ["delivering", new Set(["delivered", "out_of_stock", "delivery_failed"])],
   ["out_of_stock", new Set(["delivering"])],
   ["delivery_failed", new Set(["delivering"])],
-  ["payment_failed", new Set()],
+  ["payment_failed", new Set(["paid"])],
   ["delivered", new Set()],
 ]);
 

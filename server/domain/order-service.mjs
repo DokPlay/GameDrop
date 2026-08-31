@@ -28,8 +28,9 @@ export function toPublicOrder(row) {
 }
 
 export class OrderService {
-  constructor({ pool }) {
+  constructor({ pool, paymentService = null }) {
     this.pool = pool;
+    this.paymentService = paymentService;
   }
 
   async createOrder(input) {
@@ -41,7 +42,7 @@ export class OrderService {
       );
     }
 
-    return withTransaction(async (client) => {
+    const created = await withTransaction(async (client) => {
       await client.query(
         "SELECT pg_advisory_xact_lock(hashtextextended($1::text, 0))",
         [input.clientRequestId],
@@ -62,7 +63,7 @@ export class OrderService {
       const subtotal = product.price_minor;
       const discount = calculateDiscount(subtotal, promo);
       const order = await repository.insert({
-        id: randomUUID(),
+        id: input.clientRequestId,
         clientRequestId: input.clientRequestId,
         productId: product.id,
         promoId: promo?.id ?? null,
@@ -85,6 +86,12 @@ export class OrderService {
 
       return toPublicOrder(order);
     }, { pool: this.pool });
+
+    if (this.paymentService) {
+      await this.paymentService.processPendingPayments(created.id);
+      return this.getOrder(created.id);
+    }
+    return created;
   }
 
   async getOrder(orderId) {
