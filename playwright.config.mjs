@@ -8,7 +8,7 @@ export default defineConfig({
   expect: { timeout: 5_000 },
   use: {
     baseURL: "http://127.0.0.1:5173",
-    channel: "chrome",
+    channel: process.platform === "win32" ? "chrome" : undefined,
     headless: true,
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
