@@ -3,15 +3,69 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta
-      name="description"
-      content="GameDrop — тестовая витрина цифровых товаров с безопасной выдачей ключей."
-    />
-    <title>GameDrop</title>
+    <meta name="theme-color" content="#0b0b0d" />
+    <meta name="description" content="GameDrop — демонстрационная витрина цифровых товаров с безопасной exactly-once выдачей ключей." />
+    <title>GameDrop — цифровые товары без лишнего</title>
+    <link rel="stylesheet" href="/src/styles/tokens.css" />
+    <link rel="stylesheet" href="/src/styles/base.css" />
+    <link rel="stylesheet" href="/src/styles/storefront.css" />
+    <link rel="stylesheet" href="/src/styles/components.css" />
+    <link rel="stylesheet" href="/src/styles/responsive.css" />
   </head>
   <body>
-    <main id="app" aria-live="polite">
-      <noscript>Для работы GameDrop необходимо включить JavaScript.</noscript>
+    <a class="skip-link" href="#content">Перейти к товарам</a>
+    <header class="site-header">
+      <div class="header-inner">
+        <a class="brand" href="/" aria-label="GameDrop — главная"><span class="brand-mark" aria-hidden="true">G</span><span>GameDrop</span></a>
+        <button class="catalog-button" type="button" aria-label="Каталог" aria-expanded="false" aria-controls="catalog-menu"><span class="catalog-grid" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Каталог</button>
+        <label class="search-box"><span class="sr-only">Поиск</span><input type="search" placeholder="Игра, приложение или услуга..." /><span aria-hidden="true">⌕</span></label>
+        <nav class="header-actions" aria-label="Сервисы пользователя"><a href="#seller">Стать продавцом</a><button class="icon-button" type="button" aria-label="Избранное">♡</button><button class="icon-button cart-button" type="button" aria-label="Корзина"><span aria-hidden="true">▱</span><b>0</b></button></nav>
+      </div>
+      <div id="catalog-menu" class="catalog-menu" role="dialog" aria-label="Каталог товаров" aria-modal="false" hidden>
+        <div class="catalog-sidebar">
+          <p class="eyebrow">Категории</p>
+          <button class="catalog-category is-active" type="button">Игры и сервисы <span>›</span></button><button class="catalog-category" type="button">Ключи активации <span>›</span></button><button class="catalog-category" type="button">Игровая валюта <span>›</span></button><button class="catalog-category" type="button">Подписки <span>›</span></button><button class="catalog-category" type="button">Аккаунты <span>›</span></button>
+        </div>
+        <div class="catalog-content">
+          <div class="catalog-heading"><div><p class="eyebrow">847 направлений</p><h2>Игры и сервисы</h2></div><button class="catalog-close" type="button" aria-label="Закрыть меню">×</button></div>
+          <div class="catalog-columns"><section><h3>Популярное</h3><a href="#steam">Steam</a><a href="#roblox">Roblox</a><a href="#telegram">Telegram</a><a href="#chatgpt">ChatGPT</a></section><section><h3>Игры</h3><a href="#products">Counter-Strike 2</a><a href="#products">Brawl Stars</a><a href="#products">PUBG Mobile</a><a href="#products">Mobile Legends</a></section><section><h3>Подписки</h3><a href="#products">PlayStation Plus</a><a href="#products">App Store</a><a href="#products">TikTok Coins</a><a href="#products">Другие сервисы</a></section></div>
+          <div class="catalog-promo"><span>Бонус</span><strong>–10% на первый заказ</strong><code>WELCOME10</code></div>
+        </div>
+      </div>
+    </header>
+
+    <main id="content">
+      <section class="hero container" aria-label="Специальные предложения">
+        <div class="hero-slides">
+          <article class="hero-slide is-active" data-slide="0" aria-hidden="false"><div class="hero-copy"><span class="hero-badge">Гарантия выдачи</span><h1>Цифровые товары.<br />Без ожидания.</h1><p>Оплатите заказ и получите ключ автоматически — только один раз, даже при повторном платеже.</p><a class="button button-light" href="#products">Смотреть товары <span>→</span></a></div><img src="/assets/wildcat-hero.png" alt="Обложка Wildcat Gun Machine" /></article>
+          <article class="hero-slide hero-slide-purple" data-slide="1" aria-hidden="true"><div class="hero-copy"><span class="hero-badge">Стартовый бонус</span><h2>WELCOME10</h2><p>Скидка 10% рассчитывается на сервере и не превысит установленный лимит использований.</p><button class="button button-light" type="button" data-copy-promo>Скопировать промокод</button></div><img src="/assets/promo-brawl.png" alt="Иллюстрация игрового предложения" /></article>
+          <article class="hero-slide hero-slide-blue" data-slide="2" aria-hidden="true"><div class="hero-copy"><span class="hero-badge">Steam</span><h2>Пополнение<br />за пару кликов</h2><p>Устойчивый заказ с безопасным повтором, прозрачным статусом и восстановлением после ошибки.</p><button class="button button-light" type="button" data-open-checkout="STEAM-TOPUP-500">Пополнить Steam</button></div><img src="/assets/steam.png" alt="Логотип Steam" /></article>
+        </div>
+        <div class="hero-controls"><div class="hero-dots" aria-label="Выбор баннера"></div><div><button type="button" aria-label="Предыдущий баннер">←</button><button type="button" aria-label="Следующий баннер">→</button></div></div>
+      </section>
+
+      <section class="service-panel container" aria-labelledby="services-title">
+        <div class="section-heading compact"><div><p class="eyebrow">Всё в одном месте</p><h2 id="services-title">Популярные сервисы</h2></div><a href="#products">Все 847 <span>→</span></a></div>
+        <div class="service-list">
+          <a class="service-card" id="steam" data-service="steam" href="#products"><img src="/assets/steam.png" alt="" /><span>Steam</span></a><a class="service-card" id="roblox" data-service="roblox" href="#products"><img src="/assets/roblox.png" alt="" /><span>Roblox</span></a><a class="service-card" id="telegram" data-service="telegram" href="#products"><img src="/assets/telegram.png" alt="" /><span>Telegram</span></a><a class="service-card" id="chatgpt" data-service="chatgpt" href="#products"><img src="/assets/chatgpt.png" alt="" /><span>ChatGPT</span></a><a class="service-card" data-service="tiktok" href="#products"><img src="/assets/tiktok.png" alt="" /><span>TikTok</span></a><a class="service-card" data-service="brawl-stars" href="#products"><img src="/assets/brawl-stars.png" alt="" /><span>Brawl Stars</span></a><a class="service-card" data-service="app-store" href="#products"><img src="/assets/app-store.png" alt="" /><span>App Store</span></a><a class="service-card" data-service="playstation" href="#products"><img src="/assets/playstation.png" alt="" /><span>PlayStation</span></a><a class="service-card" data-service="pubg" href="#products"><img src="/assets/pubg-mobile.png" alt="" /><span>PUBG Mob...</span></a><a class="service-card" data-service="mobile-legends" href="#products"><img src="/assets/mobile-legends.png" alt="" /><span>Mobile Leg...</span></a><a class="service-card" data-service="more" href="#products"><img src="/assets/more.png" alt="" /><span>ещё 841</span></a>
+        </div>
+        <div class="category-pills" aria-label="Тип товара"><button type="button">⚡ Донат</button><button type="button">◉ Подписки</button><button type="button">◇ Предметы</button><button type="button">▣ Аккаунты</button><button class="is-active" type="button">⌁ Ключи</button><button type="button">● Игровая валюта</button><button type="button">••• Другое</button></div>
+      </section>
+
+      <div id="products" class="product-sections container"></div>
+
+      <section class="reviews container" aria-labelledby="reviews-title">
+        <div class="section-heading"><div><p class="eyebrow">Покупатели говорят</p><h2 id="reviews-title">Последние отзывы</h2></div><p>Отзывы с независимой площадки</p></div>
+        <div class="review-grid"><article><header><span class="review-avatar">B</span><div><strong>Bizidin</strong><span>Сегодня в 11:48</span></div><b>5.0 ★★★★★</b></header><p>Отзывчивый и приятный продавец, помог не только с товаром, но и с другим вопросом. Рекомендую!</p><footer><span>⚡ Сервер под ключ</span><strong>139 ₽</strong></footer></article><article><header><span class="review-avatar">A</span><div><strong>Alexey</strong><span>Сегодня в 10:12</span></div><b>5.0 ★★★★★</b></header><p>Ключ пришёл сразу после оплаты. Понравилось, что статус заказа виден на каждом шаге.</p><footer><span>◉ Steam Prime</span><strong>1 290 ₽</strong></footer></article><article><header><span class="review-avatar">M</span><div><strong>Maria</strong><span>Вчера в 22:01</span></div><b>5.0 ★★★★★</b></header><p>Поддержка быстро помогла восстановить выдачу после пополнения склада. Код остался один.</p><footer><span>◇ Game key</span><strong>990 ₽</strong></footer></article></div>
+      </section>
+
+      <section class="admin-demo container" aria-labelledby="admin-title"><div><p class="eyebrow">Bonus stage</p><h2 id="admin-title">Панель восстановления</h2><p>Список оплаченных, но невыданных заказов, пополнение пула и безопасный retry.</p></div><form class="admin-login" data-admin-login><label>ADMIN_TOKEN<input type="password" name="token" autocomplete="off" placeholder="Введите токен" /></label><button class="button button-dark" type="submit">Открыть</button></form><div class="admin-content" data-admin-content hidden></div></section>
     </main>
+
+    <footer class="site-footer"><div class="footer-inner container"><div><a class="brand footer-brand" href="/"><span class="brand-mark">G</span><span>GameDrop</span></a><p>Прототип fullstack‑витрины цифровых товаров. Без реального эквайринга.</p></div><nav aria-label="Информация"><a href="#seller">Стать продавцом</a><a href="#products">Бонусы</a><a href="#reviews-title">Отзывы</a><a href="#admin-title">Поддержка</a></nav><div class="footer-meta"><span>VISA</span><span>МИР</span><span>СБП</span><p>MIT · Test prototype · 2026</p></div></div></footer>
+
+    <dialog class="checkout-dialog" data-checkout-dialog aria-labelledby="checkout-title"><button class="dialog-close" type="button" data-close-checkout aria-label="Закрыть оформление">×</button><div class="checkout-product"><img data-checkout-image src="/assets/wildcat.png" alt="" /><div><p class="eyebrow">Безопасная покупка</p><h2 id="checkout-title" data-checkout-title>Counter-Strike 2 Prime</h2><p data-checkout-description>Цифровой ключ для Steam с автоматической выдачей.</p></div></div><form data-checkout-form><label>Промокод <input name="promo_code" placeholder="WELCOME10" autocomplete="off" /></label><div class="checkout-total"><span>Итого</span><strong data-checkout-price>1 290 ₽</strong></div><button class="button button-dark button-wide" type="submit">Создать заказ и оплатить</button></form><div class="order-progress" data-order-progress hidden aria-live="polite"></div></dialog>
+    <div class="toast" role="status" aria-live="polite" hidden></div>
+    <script type="module" src="/src/main.js"></script>
   </body>
 </html>

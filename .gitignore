@@ -7,8 +7,9 @@ dist/
 coverage/
 test-results/
 playwright-report/
+deno.lock
 .codex-import/
+public/assets/figma/
 .docx-review/
 .docx_nameideas_render/
 *.log
-

@@ -3,7 +3,14 @@ import globals from "globals";
 
 export default [
   {
-    ignores: ["dist/**", "coverage/**", "playwright-report/**", "test-results/**"],
+    ignores: [
+      ".netlify/**",
+      "dist/**",
+      "coverage/**",
+      "playwright-report/**",
+      "public/assets/figma/**",
+      "test-results/**",
+    ],
   },
   js.configs.recommended,
   {
@@ -21,4 +28,3 @@ export default [
     }
   }
 ];
-
