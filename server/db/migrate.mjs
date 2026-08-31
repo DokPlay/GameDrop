@@ -1,9 +1,12 @@
 import { createHash } from "node:crypto";
 import { readdir, readFile } from "node:fs/promises";
+import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { getPool } from "./pool.mjs";
 
-const migrationsDirectory = fileURLToPath(new URL("./migrations/", import.meta.url));
+const migrationsDirectory = fileURLToPath(
+  new URL("../../netlify/database/migrations/", import.meta.url),
+);
 
 export function migrationChecksum(sql) {
   const canonicalSql = sql.replace(/\r\n?/g, "\n");
@@ -29,7 +32,7 @@ export async function migrate(options = {}) {
       .sort();
 
     for (const file of files) {
-      const sql = await readFile(new URL(`./migrations/${file}`, import.meta.url), "utf8");
+      const sql = await readFile(join(migrationsDirectory, file), "utf8");
       const checksum = migrationChecksum(sql);
       const existing = await client.query(
         "SELECT checksum FROM schema_migrations WHERE version = $1",

@@ -2,6 +2,8 @@
 
 Полноценный тестовый прототип маркетплейса цифровых товаров: витрина по исходному Figma-макету, REST API, заглушка оплаты, автоматическая выдача ключей и доказанная конкурентная безопасность.
 
+Демо: [gamedrop-dokplay.netlify.app](https://gamedrop-dokplay.netlify.app)
+
 ![GameDrop storefront](docs/assets/storefront-preview.png)
 
 ## Что реализовано
@@ -219,18 +221,13 @@ Runner намеренно отказывается выполнять `TRUNCATE`
 ## Бесплатный deploy на Netlify
 
 1. Подключите GitHub-репозиторий в Netlify.
-2. Создайте бесплатную PostgreSQL-базу, например Neon или Supabase Free.
-3. Выполните миграции и seed против удалённой тестовой базы:
+2. На странице проекта откройте **Database** и выберите ручное создание Netlify Database.
+3. Схема и демонстрационные данные из `netlify/database/migrations` применятся автоматически перед публикацией production deploy.
+4. Runtime получает безопасное подключение через `@netlify/database`; локальные тесты и CI по-прежнему используют `DATABASE_URL`.
+5. Для admin recovery добавьте случайный `ADMIN_TOKEN` в переменные окружения проекта.
+6. Build command и publish directory уже заданы в `netlify.toml`: `pnpm build`, `dist`.
 
-   ```bash
-   DATABASE_URL="..." DATABASE_SSL=true pnpm db:migrate
-   DATABASE_URL="..." DATABASE_SSL=true pnpm db:seed
-   ```
-
-4. В Netlify добавьте `DATABASE_URL`, `DATABASE_SSL=true` и случайный `ADMIN_TOKEN`.
-5. Build command и publish directory уже заданы в `netlify.toml`: `pnpm build`, `dist`.
-
-Сайт получит бесплатный адрес `*.netlify.app`; собственный домен не требуется. Без `DATABASE_URL` статическая витрина откроется, но API покупки закономерно вернёт серверную ошибку.
+Сайт получает бесплатный адрес `*.netlify.app`; собственный домен не требуется. Netlify Database работает в пределах бесплатных кредитов аккаунта и засыпает после пяти минут бездействия.
 
 ## Макет
 

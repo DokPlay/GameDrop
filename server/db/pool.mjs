@@ -1,13 +1,25 @@
+import { getConnectionString } from "@netlify/database";
 import pg from "pg";
 
 const { Pool } = pg;
 let sharedPool;
 
-export function createPool(overrides = {}) {
-  const connectionString = overrides.connectionString ?? process.env.DATABASE_URL;
-  if (!connectionString) {
-    throw new Error("DATABASE_URL is required");
+export function resolveDatabaseUrl(options = {}) {
+  const environment = options.environment ?? process.env;
+  const databaseUrl = options.databaseUrl ?? environment.DATABASE_URL;
+  if (databaseUrl) {
+    return databaseUrl;
   }
+
+  const netlifyUrl = (options.getNetlifyUrl ?? getConnectionString)();
+  if (!netlifyUrl) {
+    throw new Error("PostgreSQL connection string is required");
+  }
+  return netlifyUrl;
+}
+
+export function createPool(overrides = {}) {
+  const connectionString = resolveDatabaseUrl({ databaseUrl: overrides.connectionString });
 
   return new Pool({
     connectionString,
@@ -16,7 +28,7 @@ export function createPool(overrides = {}) {
     connectionTimeoutMillis: overrides.connectionTimeoutMillis ?? 5_000,
     ssl:
       overrides.ssl
-      ?? (process.env.DATABASE_SSL === "true" ? { rejectUnauthorized: false } : false),
+      ?? (process.env.DATABASE_SSL === "true" ? { rejectUnauthorized: false } : undefined),
   });
 }
 

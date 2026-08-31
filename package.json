@@ -23,6 +23,7 @@
     "db:seed": "node scripts/seed.mjs"
   },
   "dependencies": {
+    "@netlify/database": "^2.0.0",
     "pg": "^8.23.0"
   },
   "devDependencies": {
