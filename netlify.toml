@@ -3,6 +3,10 @@
   publish = "dist"
   functions = "netlify/functions"
 
+[build.environment]
+  NODE_VERSION = "22"
+  PNPM_VERSION = "11.19.0"
+
 [functions]
   node_bundler = "esbuild"
 
@@ -15,4 +19,3 @@
   from = "/*"
   to = "/index.html"
   status = 200
-
