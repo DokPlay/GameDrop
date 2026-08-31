@@ -23,7 +23,9 @@
     "db:seed": "node scripts/seed.mjs"
   },
   "dependencies": {
+    "@fontsource/montserrat": "^5.3.0",
     "@netlify/database": "^2.0.0",
+    "lucide": "^1.37.0",
     "pg": "^8.23.0"
   },
   "devDependencies": {

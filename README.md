@@ -10,7 +10,8 @@
 
 - адаптивная витрина на чистых HTML, CSS и JavaScript без React/Vue/Next;
 - оригинальные изображения из предоставленного `Untitled (2).fig`;
-- карусель, мегаменю каталога, переключатель валют и hover-состояния карточек;
+- карусель, интерактивное мегаменю, поиск, фильтры, избранное, корзина и переключатель валют;
+- отдельный блок пополнения Steam по исходному макету с промокодом и выбором валюты;
 - живой checkout: создание заказа → тестовая оплата → статус → выданный ключ;
 - REST API в Netlify Function;
 - PostgreSQL-схема с транзакциями, блокировками и ограничениями уникальности;
@@ -19,11 +20,12 @@
 - восстановимое `out_of_stock` / `delivery_failed`, список проблемных заказов, refill и безопасный admin retry;
 - поставщики A/B: детерминированный ответ `(provider, request_id)`, сохранение результата до таймаута, fallback только после явного 5xx;
 - промокоды с серверным расчётом скидки и атомарным лимитом использований;
+- пять товаров витрины синхронизированы с PostgreSQL; для каждого pool‑товара загружено по 12 демо‑ключей;
 - unit, PostgreSQL integration, browser E2E, acceptance race scripts и GitHub Actions.
 
 ## Стек
 
-- Frontend: HTML5, CSS3, JavaScript ES modules, Vite.
+- Frontend: HTML5, CSS3, JavaScript ES modules, Vite, Montserrat и Lucide icons.
 - Backend: Node.js 22, Netlify Functions, framework-free REST router.
 - Data: PostgreSQL 16, `pg`, SQL migrations.
 - QA: Vitest, Playwright, ESLint, GitHub Actions.

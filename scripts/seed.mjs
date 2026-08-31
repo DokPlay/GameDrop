@@ -18,6 +18,34 @@ const products = [
     price: 55000,
     mode: "supplier",
   },
+  {
+    sku: "WILDCAT-GUN",
+    name: "Wildcat Gun Machine",
+    description: "Цифровой ключ Wildcat Gun Machine с автоматической выдачей.",
+    price: 99000,
+    mode: "pool",
+  },
+  {
+    sku: "ROGUE-COMPANY",
+    name: "Rogue Company — Epic Games",
+    description: "Цифровой ключ Rogue Company для Epic Games.",
+    price: 59900,
+    mode: "pool",
+  },
+  {
+    sku: "ZOMBIE-ARMY-4",
+    name: "Zombie Army 4: Dead War",
+    description: "Цифровой ключ Zombie Army 4: Dead War для Steam.",
+    price: 149000,
+    mode: "pool",
+  },
+];
+
+const inventoryPools = [
+  { sku: "KEY-CS2-PRIME", prefix: "CS2-PRIME-DEMO" },
+  { sku: "WILDCAT-GUN", prefix: "WILDCAT-DEMO" },
+  { sku: "ROGUE-COMPANY", prefix: "ROGUE-DEMO" },
+  { sku: "ZOMBIE-ARMY-4", prefix: "ZOMBIE4-DEMO" },
 ];
 
 const pool = getPool();
@@ -49,17 +77,20 @@ try {
       [randomUUID()],
     );
 
-    const { rows } = await client.query(
-      "SELECT id FROM products WHERE sku = 'KEY-CS2-PRIME'",
-    );
-    for (let index = 1; index <= 12; index += 1) {
-      const code = `CS2-PRIME-DEMO-${String(index).padStart(4, "0")}`;
-      await client.query(
-        `INSERT INTO inventory_keys (id, product_id, code)
-         VALUES ($1, $2, $3)
-         ON CONFLICT (code) DO NOTHING`,
-        [randomUUID(), rows[0].id, code],
+    for (const inventoryPool of inventoryPools) {
+      const { rows } = await client.query(
+        "SELECT id FROM products WHERE sku = $1",
+        [inventoryPool.sku],
       );
+      for (let index = 1; index <= 12; index += 1) {
+        const code = `${inventoryPool.prefix}-${String(index).padStart(4, "0")}`;
+        await client.query(
+          `INSERT INTO inventory_keys (id, product_id, code)
+           VALUES ($1, $2, $3)
+           ON CONFLICT (code) DO NOTHING`,
+          [randomUUID(), rows[0].id, code],
+        );
+      }
     }
   }, { pool });
   process.stdout.write("GameDrop seed data is ready.\n");
